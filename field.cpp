@@ -34,16 +34,6 @@ int field::getSize()
     return this->_size;
 }
 
-int field::getOpenNumberCellCount()
-{
-    return this->_countOpenNumberCells;
-}
-
-void field::incrementOpenNumberCellCount()
-{
-    this->_countOpenNumberCells++;
-}
-
 int field::index(int row, int col)
 {
     return row * this->_size + col;

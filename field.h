@@ -14,18 +14,15 @@ class field
 public:
     field() {}
     field(int size);
-    cell& getCell(int row, int col);
     open_result openCell(int row, int col);
     void setNumberToCell(int row, int col, int number);
     int getSize();
-    int getOpenNumberCellCount();
-    void incrementOpenNumberCellCount();
 
 private:
     int _size = 4;
     cell* _cells;
-    int _countOpenNumberCells = 0;
 
+    cell& getCell(int row, int col);
     int index(int row, int col);
 };
 
