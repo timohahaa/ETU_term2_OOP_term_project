@@ -10,11 +10,15 @@ CONFIG += c++17
 
 SOURCES += \
     cell.cpp \
+    field.cpp \
+    gamecontroler.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     cell.h \
+    field.h \
+    gamecontroler.h \
     mainwindow.h
 
 FORMS += \

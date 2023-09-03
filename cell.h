@@ -3,12 +3,20 @@
 #define CELL_H
 
 
-
-
 class cell
 {
 public:
     cell();
+    void open();
+    bool isOpen();
+    bool hasNumber();
+    int number();
+    void setNumber(int number);
+
+private:
+    bool _hasNumber = false;
+    bool _isOpen = false;
+    int _number = 0;
 };
 
-#endif // CELL_H
+#endif //CELL_H
