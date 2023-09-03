@@ -18,13 +18,10 @@ public:
     open_result openCell(int row, int col);
     void setNumberToCell(int row, int col, int number);
     int getSize();
-    int getOpenNumberCellCount();
-    void incrementOpenNumberCellCount();
 
 private:
     int _size = 4;
     cell* _cells;
-    int _countOpenNumberCells = 0;
 
     int index(int row, int col);
 };
