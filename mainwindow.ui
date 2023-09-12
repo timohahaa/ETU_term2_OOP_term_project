@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>3</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="mainMenuPage">
        <layout class="QGridLayout" name="gridLayout_2">
@@ -442,6 +442,13 @@
           </item>
          </layout>
         </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="pushButton_4">
+          <property name="text">
+           <string>В главное меню</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="connectionPage">
@@ -520,18 +527,71 @@
       <widget class="QWidget" name="gamePage">
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="0" column="0">
-         <layout class="QVBoxLayout" name="verticalLayout_5">
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_8">
-            <item>
-             <widget class="QLabel" name="label_9">
-              <property name="text">
-               <string>Сейчас: расстановка чисел</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Сейчас: расстановка чисел</string>
+            </property>
+           </widget>
           </item>
+         </layout>
+        </item>
+        <item row="1" column="3">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QTableWidget" name="tableWidget_2">
+            <attribute name="horizontalHeaderVisible">
+             <bool>false</bool>
+            </attribute>
+            <attribute name="horizontalHeaderDefaultSectionSize">
+             <number>90</number>
+            </attribute>
+            <attribute name="verticalHeaderVisible">
+             <bool>false</bool>
+            </attribute>
+            <attribute name="verticalHeaderMinimumSectionSize">
+             <number>20</number>
+            </attribute>
+            <attribute name="verticalHeaderDefaultSectionSize">
+             <number>90</number>
+            </attribute>
+            <row>
+             <property name="text">
+              <string>Новая строка</string>
+             </property>
+            </row>
+            <row>
+             <property name="text">
+              <string>Новая строка</string>
+             </property>
+            </row>
+            <row>
+             <property name="text">
+              <string>Новая строка</string>
+             </property>
+            </row>
+            <column>
+             <property name="text">
+              <string>Новый столбец</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Новый столбец</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Новый столбец</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0">
+         <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
            <widget class="QTableWidget" name="tableWidget">
             <property name="gridStyle">
@@ -591,6 +651,23 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Ваше поле</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="QLabel" name="label_11">
+          <property name="text">
+           <string>Поле соперника</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
