@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="mainMenuPage">
        <layout class="QGridLayout" name="gridLayout_2">
@@ -594,6 +594,12 @@
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
            <widget class="QTableWidget" name="tableWidget">
+            <property name="maximumSize">
+             <size>
+              <width>377</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="gridStyle">
              <enum>Qt::SolidLine</enum>
             </property>
