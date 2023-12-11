@@ -217,14 +217,14 @@ void Server::process_connection()
         player1 = tcpServer->nextPendingConnection();
         auto msg = ConnectionMessages::ConnectAndWait();
         msg.send_to(player1);
-        qDebug()<<"Есть игрок1";
+        qDebug()<<"Есть игрок 1";
     }
     else if (player2 == nullptr){
         player2 =  tcpServer->nextPendingConnection();
         auto msg = ConnectionMessages::ConnectAndStart();
         msg.send_to(player2);
 
-        qDebug()<<"Есть игрок2";
+        qDebug()<<"Есть игрок 2";
     }
     else{
 

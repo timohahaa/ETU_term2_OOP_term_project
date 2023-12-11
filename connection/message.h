@@ -24,30 +24,31 @@ public:
         newm.read(socket);
         return newm;
     }
-
     void set_json(QJsonDocument json){
         data = json.toJson();
-        length = data.size();
+        length = quint16(data.size());
     }
     bool read(QTcpSocket *socket){
         QDataStream stream(socket);
+        stream.setVersion(QDataStream::Qt_5_0);
+        stream.setByteOrder(QDataStream::BigEndian);
 
+        QByteArray l;
+        QByteArray arr;
 
-        //auto a = socket->bytesAvailable();
         if (socket->bytesAvailable() < sizeof(quint16)){
             return 1;
         }
+        l.resize(sizeof(quint16));
+        stream.readRawData(l.data(), sizeof(quint16));
+        length = l.toUInt();
 
-        quint16 a;
-        stream >> a;
-        stream >> this->length;
+        arr.resize(length);
+        stream.readRawData(arr.data(), length);
+        data = arr;
 
+        //stream.writeBytes(this->data, this->length);
 
-        if (socket->bytesAvailable() < length) {
-            return 1;
-        }
-
-        stream >> this->data;
         return 0;
     }
 
@@ -60,6 +61,10 @@ public:
         QDataStream outputStream(socket);
         outputStream << pack();
     }
+    QString get_json_string(){
+        return QString::fromUtf8(data);
+    }
+
     QJsonDocument get_data()
     {
         return QJsonDocument::fromJson(data);
@@ -67,8 +72,12 @@ public:
     QByteArray pack()
     {
         QByteArray msg;
+        msg.clear();
         QDataStream outputStream(&msg, QIODevice::WriteOnly);
-        outputStream << length << data;
+        outputStream.setVersion(QDataStream::Qt_5_0);
+        outputStream.setByteOrder(QDataStream::BigEndian);
+        outputStream << this->length;
+        msg.append(this->data);
         return msg;
     }
     explicit operator bool() const

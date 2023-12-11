@@ -40,6 +40,6 @@ void QGameClient::sockReadyRead()
 {
      auto msg = Message::getFromSocket(this->socket);
 
-    //qDebug() << "МНЕ ПРИШЛО СООБЩЕНИЕ" << QString::fromUtf8(msg.pack());
+    qDebug() << "КЛИЕНТ: ПРИШЛО СООБЩЕНИЕ" << msg.get_json_string();
 
 }
