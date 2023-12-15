@@ -5,7 +5,6 @@
 #include <QTcpSocket>
 #include <QJsonObject>
 class Message{
-    quint16 length = 0;
     QByteArray data;
 
 public:
@@ -13,39 +12,46 @@ public:
     {
         Message newm;
         newm.data = json.toJson();
-        newm.length = newm.data.size();
         return newm;
     }
     static Message from_string(QString string){
         return from_json(QJsonDocument::fromJson(string.toUtf8()));
     }
-    static Message getFromSocket(QTcpSocket *socket){
+    static Message getFromSocket(QTcpSocket *&socket){
         Message newm;
         newm.read(socket);
         return newm;
     }
     void set_json(QJsonDocument json){
         data = json.toJson();
-        length = quint16(data.size());
     }
-    bool read(QTcpSocket *socket){
+    bool read(QTcpSocket *&socket){
         QDataStream stream(socket);
         stream.setVersion(QDataStream::Qt_5_0);
         stream.setByteOrder(QDataStream::BigEndian);
+        qDebug()<<socket->bytesAvailable();
+        quint32 length = 0;
+        stream >> length;
+        qDebug() << length;
+        qDebug() << socket->bytesAvailable();
+        //stream >> this->data;
 
-        QByteArray l;
-        QByteArray arr;
+        this->data.resize(length);
+        stream.readRawData(this->data.data(), length);
 
-        if (socket->bytesAvailable() < sizeof(quint16)){
-            return 1;
-        }
-        l.resize(sizeof(quint16));
-        stream.readRawData(l.data(), sizeof(quint16));
-        length = l.toUInt();
 
-        arr.resize(length);
-        stream.readRawData(arr.data(), length);
-        data = arr;
+        //if (socket->bytesAvailable() < sizeof(quint64)){
+        //    return 1;
+        //}
+
+
+
+
+//        l.resize(sizeof(quint16));
+//        stream.readRawData(l.data(), sizeof(quint16));
+//        length = l.toUInt();
+
+//
 
         //stream.writeBytes(this->data, this->length);
 
@@ -59,7 +65,10 @@ public:
 
     void send_to(QTcpSocket *socket){
         QDataStream outputStream(socket);
-        outputStream << pack();
+        outputStream.setVersion(QDataStream::Qt_5_0);
+        outputStream.setByteOrder(QDataStream::BigEndian);
+        auto msg = pack();
+        outputStream << msg;
     }
     QString get_json_string(){
         return QString::fromUtf8(data);
@@ -71,17 +80,18 @@ public:
     }
     QByteArray pack()
     {
-        QByteArray msg;
-        msg.clear();
-        QDataStream outputStream(&msg, QIODevice::WriteOnly);
-        outputStream.setVersion(QDataStream::Qt_5_0);
-        outputStream.setByteOrder(QDataStream::BigEndian);
-        outputStream << this->length;
-        msg.append(this->data);
-        return msg;
+        //QByteArray msg;
+        //msg.clear();
+
+        //QDataStream outputStream(&msg, QIODevice::WriteOnly);
+        //outputStream.setVersion(QDataStream::Qt_5_0);
+        //outputStream.setByteOrder(QDataStream::LittleEndian);
+
+        //outputStream << data.; //msg.append(this->data);
+        return this->data;
     }
     explicit operator bool() const
-    { return length>0; }
+    { return !this->data.isEmpty(); }
 };
 
 class ConnectionMessages{
@@ -105,6 +115,7 @@ public:
         answer.insert("status", QJsonValue("success"));
         answer.insert("next", QJsonValue("start"));
         QJsonDocument json(answer);
-        return Message::from_json(json);};
+        return Message::from_json(json);
+    };
 
 };

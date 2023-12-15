@@ -26,19 +26,20 @@ void QGameClient::disconnect()
 
 void QGameClient::connection_error()
 {
-    qDebug() << "ОШИБКА СОЕДИНЕНИЯ";
+    qDebug() << "КЛИЕНТ: ОШИБКА СОЕДИНЕНИЯ";
     emit cant_connect();
 }
 
 void QGameClient::connection_success()
 {
-    qDebug() << "СОЕДИНЕНИЕ УСПЕШНО";
+    qDebug() << "КЛИЕНТ: СОЕДИНЕНИЕ УСПЕШНО";
     emit start_game();
 }
 
 void QGameClient::sockReadyRead()
 {
-     auto msg = Message::getFromSocket(this->socket);
+    qDebug() << this->socket->bytesAvailable();
+    auto msg = Message::getFromSocket(this->socket);
 
     qDebug() << "КЛИЕНТ: ПРИШЛО СООБЩЕНИЕ" << msg.get_json_string();
 

@@ -22,6 +22,7 @@ public:
     QString get_address();
     void shutdown();
     void init();
+
 private slots:
     void process_connection();
     void readyRead();
