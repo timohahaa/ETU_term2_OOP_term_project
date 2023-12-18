@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QTcpSocket>
+#include "../message.h"
 
 class QGameClient : public QObject
 {
@@ -15,6 +16,7 @@ public:
     QTcpSocket *socket = new QTcpSocket;
     void connectToHost(QString host, quint16 port);
     void disconnect();
+    void process_answer(Message msg);
 private slots:
 
     void connection_error();
@@ -26,6 +28,7 @@ signals:
     void server_disconnected();
     void connect_and_wait();
     void connect_and_start();
+
 
     void start_game();
 

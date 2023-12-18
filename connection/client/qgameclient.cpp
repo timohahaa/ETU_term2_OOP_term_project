@@ -1,6 +1,6 @@
 
 #include "qgameclient.h"
-#include "../message.h"
+//#include "../message.h"
 
 QGameClient::QGameClient(QObject *parent)
     : QObject{parent}
@@ -23,6 +23,11 @@ void QGameClient::disconnect()
     socket->disconnectFromHost();
 }
 
+void QGameClient::process_answer(Message msg)
+{
+
+}
+
 
 void QGameClient::connection_error()
 {
@@ -38,9 +43,9 @@ void QGameClient::connection_success()
 
 void QGameClient::sockReadyRead()
 {
-    qDebug() << this->socket->bytesAvailable();
     auto msg = Message::getFromSocket(this->socket);
 
     qDebug() << "КЛИЕНТ: ПРИШЛО СООБЩЕНИЕ" << msg.get_json_string();
+
 
 }

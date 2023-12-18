@@ -7,7 +7,7 @@
 #include <connection/client/qgameclient.h>
 
 #include <QMessageBox>
-
+#include <QDateTime>
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -21,7 +21,6 @@ public:
     MainWindow(QWidget *parent = nullptr);
     QMessageBox message_box_talker;
     ~MainWindow();
-
 
 private slots:
     void on_exit_button_clicked();
@@ -41,6 +40,8 @@ private slots:
     //void server_ready();
 
 private:
+    quint64 start_time;
+
     Ui::MainWindow *ui;
 
     Server *server = nullptr;

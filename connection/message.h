@@ -29,33 +29,25 @@ public:
         QDataStream stream(socket);
         stream.setVersion(QDataStream::Qt_5_0);
         stream.setByteOrder(QDataStream::BigEndian);
-        qDebug()<<socket->bytesAvailable();
         quint32 length = 0;
+
+        if (socket->bytesAvailable() < sizeof(quint32))
+            return 0;
         stream >> length;
-        qDebug() << length;
-        qDebug() << socket->bytesAvailable();
+
         //stream >> this->data;
 
         this->data.resize(length);
+        if (socket->bytesAvailable() < length)
+            return 0;
+
         stream.readRawData(this->data.data(), length);
+        if (socket->bytesAvailable()!=0){
+            emit socket->readyRead();
+        }
 
+        return 1;
 
-        //if (socket->bytesAvailable() < sizeof(quint64)){
-        //    return 1;
-        //}
-
-
-
-
-//        l.resize(sizeof(quint16));
-//        stream.readRawData(l.data(), sizeof(quint16));
-//        length = l.toUInt();
-
-//
-
-        //stream.writeBytes(this->data, this->length);
-
-        return 0;
     }
 
     bool isEmpty(){
@@ -94,28 +86,31 @@ public:
     { return !this->data.isEmpty(); }
 };
 
-class ConnectionMessages{
+class ServerMessages{
 public:
-    static const Message PartyFullMessage(){
+    static const Message ConnectDecline(){
         QJsonObject answer;
         answer.insert("status", QJsonValue("error"));
         answer.insert("reason", QJsonValue("party_full"));
         QJsonDocument json(answer);
         return Message::from_json(json);
     };
-    static const Message ConnectAndWait(){
+    static const Message ConnectAccept(){
         QJsonObject answer;
         answer.insert("status", QJsonValue("success"));
-        answer.insert("next", QJsonValue("wait"));
         QJsonDocument json(answer);
         return Message::from_json(json);
     };
-    static const Message ConnectAndStart(){
-        QJsonObject answer;
-        answer.insert("status", QJsonValue("success"));
-        answer.insert("next", QJsonValue("start"));
-        QJsonDocument json(answer);
-        return Message::from_json(json);
-    };
-
 };
+
+class ClientMessages{
+public:
+    static const Message connect_handshake(quint64 time){
+        QJsonObject answer;
+        answer.insert("method", QJsonValue("connect"));
+        answer.insert("time", QJsonValue::fromVariant(QVariant(time)));
+        QJsonDocument json(answer);
+        return Message::from_json(json);
+    }
+};
+

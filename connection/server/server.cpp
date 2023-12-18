@@ -215,13 +215,13 @@ void Server::process_connection()
     qDebug()<<"Поступает соединение";
     if (player1 == nullptr){
         player1 = tcpServer->nextPendingConnection();
-        auto msg = ConnectionMessages::ConnectAndWait();
+        auto msg = ServerMessages::ConnectAccept();
         msg.send_to(player1);
         qDebug()<<"Есть игрок 1";
     }
     else if (player2 == nullptr){
         player2 =  tcpServer->nextPendingConnection();
-        auto msg = ConnectionMessages::ConnectAndStart();
+        auto msg = ServerMessages::ConnectAccept();
         msg.send_to(player2);
 
         qDebug()<<"Есть игрок 2";
@@ -229,9 +229,9 @@ void Server::process_connection()
     else{
 
         auto other = tcpServer->nextPendingConnection();
-        auto msg = ConnectionMessages::PartyFullMessage();
+        auto msg = ServerMessages::ConnectDecline();
         msg.send_to(other);
-        other->close();
+        //other->close();
         qDebug()<<"Игроков больше не принимаем";
     }
 }

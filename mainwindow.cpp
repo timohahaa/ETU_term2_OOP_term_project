@@ -23,6 +23,8 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    this->start_time = QDateTime::currentMSecsSinceEpoch();
+    qDebug() << this->start_time;
     auto *M_filter = new QIntValidator(MIN_M_VAL, MAX_M_VAL);
     auto *N_filter = new QIntValidator(MIN_N_VAL, MAX_N_VAL);
     auto *K_filter = new QIntValidator(MIN_K_VAL, MAX_K_VAL);
@@ -73,17 +75,16 @@ void MainWindow::on_create_server_button_clicked()
         //start hosting method;
 
         server = new Server(this);
-        ui->connectionStateLabel->setText(QString("Инициализация сервера...\n"));
         if (!server->start_listening()){
             ui->connectionStateLabel->setText(QString("Ошибка инициализации\n"
                                                       "Попробуйте заново, и убедитесь,\n"
                                                       "что порт 6000 свободен"));
         }
         else{
+            ui->connectionStateLabel->setText(QString("Запуск сервера...\n"));
             client = new QGameClient(this);
             client->connectToHost("localhost",6000);
-            ui->connectionStateLabel->setText(QString("Ожидание второго игрока...\n")+
-                                                      "Сервер работает на "+this->server->get_address());
+
         }
     }
     else{

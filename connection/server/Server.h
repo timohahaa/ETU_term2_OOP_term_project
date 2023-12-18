@@ -26,6 +26,8 @@ public:
 private slots:
     void process_connection();
     void readyRead();
+signals:
+    void waiting_for_second();
 
 };
 
