@@ -19,6 +19,9 @@ enum Screens{
     TitleScreen, ConfigureScreen, WaitScreen, GameScreen
 };
 
+
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -70,21 +73,33 @@ void MainWindow::on_create_server_button_clicked()
         N>=MIN_N_VAL and N<=MAX_N_VAL and
         K>=MIN_K_VAL and K<=MAX_K_VAL){
 
-        qDebug()<<"Start Hosting <<" << N << "<<" << M << "<<" << K;
-        this->ui->stackedWidget->setCurrentIndex(WaitScreen);
-        //start hosting method;
 
+
+        //ЛОГИКА СТАРТА СЕРВЕРА И САМОКОННЕКТА
+
+        this->ui->stackedWidget->setCurrentIndex(WaitScreen);
+
+        this->show_connection_status("Инициализация сервера...");
         server = new Server(this);
+
         if (!server->start_listening()){
-            ui->connectionStateLabel->setText(QString("Ошибка инициализации\n"
-                                                      "Попробуйте заново, и убедитесь,\n"
-                                                      "что порт 6000 свободен"));
+            this->show_connection_status("Ошибка инициализации\n"
+                                         "Попробуйте заново, и убедитесь,\n"
+                                         "что порт 6000 свободен");
         }
         else{
-            ui->connectionStateLabel->setText(QString("Запуск сервера...\n"));
+            self_hosting = 1;
             client = new QGameClient(this);
-            client->connectToHost("localhost",6000);
 
+            connect(client, SIGNAL(connecting()), this, SLOT(client_connecting()));
+            connect(client, SIGNAL(connect_failed()), this, SLOT(client_connect_failed()));
+            connect(client, SIGNAL(handshaking()), this, SLOT(client_handshaking()));
+            connect(client, SIGNAL(party_full()), this, SLOT(client_party_full()));
+            connect(client, SIGNAL(connected()), this, SLOT(client_connected()));
+            connect(client, SIGNAL(opponent_left()), this, SLOT(client_opponent_left()));
+            connect(client, SIGNAL(starting_game()), this, SLOT(client_starting_game()));
+
+            client->connectToHost("localhost",6000);
         }
     }
     else{
@@ -109,8 +124,19 @@ void MainWindow::on_join_button_clicked()
     ui->connectionStateLabel->setText("Соединение...");
 
     client = new QGameClient(this);
+    connect(client, SIGNAL(connecting()), this, SLOT(client_connecting()));
+    connect(client, SIGNAL(connect_failed()), this, SLOT(client_connect_failed()));
+    connect(client, SIGNAL(handshaking()), this, SLOT(client_handshaking()));
+    connect(client, SIGNAL(party_full()), this, SLOT(client_party_full()));
+    connect(client, SIGNAL(connected()), this, SLOT(client_connected()));
+    connect(client, SIGNAL(opponent_left()), this, SLOT(client_opponent_left()));
+    connect(client, SIGNAL(starting_game()), this, SLOT(client_starting_game()));
 
+    self_hosting = 0;
     client->connectToHost(host, port);
+
+
+
 
     // и вся логика загрузки
 
@@ -119,29 +145,88 @@ void MainWindow::on_join_button_clicked()
     //this->ui->opponentfieldlabel->setVisible(0);
 }
 
-
 void MainWindow::on_leave_button_clicked()
 {
     this->ui->stackedWidget->setCurrentIndex(TitleScreen);
     //и вся логика выхода
 }
 
-
 void MainWindow::on_cancel_connection_button_clicked()
 {
-    if (client){
-        client->disconnect();
-        delete client;
-    }
     if (server and server->is_listening()){
         server->shutdown();
         delete server;
         server = nullptr;
     }
 
+    if (client){
+        client->disconnect();
+        delete client;
+        client = nullptr;
+    }
+
+
+
+
+
     this->ui->stackedWidget->setCurrentIndex(TitleScreen);
     //и вся логика дисконнекта или шатдауна сервера;
 }
+
+void MainWindow::show_connection_status(QString status)
+{
+    ui->stackedWidget->setCurrentIndex(WaitScreen);
+    ui->connectionStateLabel->setText(status);
+}
+
+void MainWindow::client_connecting()
+{
+    show_connection_status("Подключение к серверу...");
+}
+
+void MainWindow::client_connect_failed()
+{
+    show_connection_status("Ошибка подключения к серверу:\nСервер не найден.");
+}
+
+void MainWindow::client_handshaking()
+{
+    show_connection_status("Обмен данными...");
+}
+
+void MainWindow::client_party_full()
+{
+    show_connection_status("На сервере уже максимальное количество игроков.\n"
+                           "Попробуйте подключиться позже");
+}
+
+void MainWindow::client_connected()
+{
+    if (self_hosting){
+        show_connection_status("Подключено, ждём игрока 2.\nСервер работает на "+this->server->get_address());
+    }
+    else {
+        show_connection_status("Оба игрока на месте. Игра скоро начнётся.");
+    }
+}
+
+void MainWindow::client_opponent_left()
+{
+    show_connection_status("Оппонент отключился от игры.");
+    client->disconnect();
+    delete client;
+    client = nullptr;
+}
+
+void MainWindow::client_starting_game()
+{
+    show_connection_status("Оба игрока на месте. Игра скоро начнётся.");
+    // сделать хендшейк с таймстемпами.
+}
+
+
+
+
 
 
 

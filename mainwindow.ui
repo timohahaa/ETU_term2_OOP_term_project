@@ -22,9 +22,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
-    <string notr="true">background: url(:/images/bg.jpg) no-repeat rigth bottom;
-background-size: cover;
-background-attachment: fixed;</string>
+    <string notr="true"/>
    </property>
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
@@ -236,18 +234,26 @@ background-attachment: fixed;</string>
               <property name="orientation">
                <enum>Qt::Vertical</enum>
               </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
-                <height>40</height>
+                <height>115</height>
                </size>
               </property>
              </spacer>
             </item>
             <item>
              <widget class="QLabel" name="create_server_label">
+              <property name="font">
+               <font>
+                <pointsize>15</pointsize>
+               </font>
+              </property>
               <property name="text">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:700;&quot;&gt;Создать сервер&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt; font-weight:700;&quot;&gt;Создать сервер&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -260,20 +266,28 @@ background-attachment: fixed;</string>
                <enum>Qt::Vertical</enum>
               </property>
               <property name="sizeType">
-               <enum>QSizePolicy::MinimumExpanding</enum>
+               <enum>QSizePolicy::Fixed</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
-                <height>40</height>
+                <height>50</height>
                </size>
               </property>
              </spacer>
             </item>
             <item>
              <layout class="QFormLayout" name="formLayout">
+              <property name="horizontalSpacing">
+               <number>40</number>
+              </property>
               <item row="0" column="0">
                <widget class="QLabel" name="input_N_label">
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
                 <property name="text">
                  <string>Сторона поля (N)</string>
                 </property>
@@ -281,6 +295,17 @@ background-attachment: fixed;</string>
               </item>
               <item row="0" column="1">
                <widget class="QLineEdit" name="N_input">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
                 <property name="maxLength">
                  <number>3</number>
                 </property>
@@ -288,6 +313,11 @@ background-attachment: fixed;</string>
               </item>
               <item row="1" column="0">
                <widget class="QLabel" name="input_M_label">
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
                 <property name="text">
                  <string>Количество чисел (M)</string>
                 </property>
@@ -295,6 +325,17 @@ background-attachment: fixed;</string>
               </item>
               <item row="1" column="1">
                <widget class="QLineEdit" name="M_input">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
                 <property name="maxLength">
                  <number>3</number>
                 </property>
@@ -302,6 +343,11 @@ background-attachment: fixed;</string>
               </item>
               <item row="2" column="0">
                <widget class="QLabel" name="input_K_label">
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
                 <property name="text">
                  <string>Количество ходов (K)</string>
                 </property>
@@ -309,6 +355,17 @@ background-attachment: fixed;</string>
               </item>
               <item row="2" column="1">
                <widget class="QLineEdit" name="K_input">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
                 <property name="maxLength">
                  <number>3</number>
                 </property>
@@ -318,6 +375,17 @@ background-attachment: fixed;</string>
             </item>
             <item>
              <widget class="QPushButton" name="create_server_button">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>40</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>13</pointsize>
+               </font>
+              </property>
               <property name="cursor">
                <cursorShape>PointingHandCursor</cursorShape>
               </property>
@@ -390,10 +458,13 @@ background-attachment: fixed;</string>
               <property name="orientation">
                <enum>Qt::Vertical</enum>
               </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
-                <height>40</height>
+                <height>115</height>
                </size>
               </property>
              </spacer>
@@ -401,7 +472,7 @@ background-attachment: fixed;</string>
             <item>
              <widget class="QLabel" name="join_game_label">
               <property name="text">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:700;&quot;&gt;Присоединиться к игре&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt; font-weight:700;&quot;&gt;Присоединиться к игре&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -414,20 +485,31 @@ background-attachment: fixed;</string>
                <enum>Qt::Vertical</enum>
               </property>
               <property name="sizeType">
-               <enum>QSizePolicy::MinimumExpanding</enum>
+               <enum>QSizePolicy::Fixed</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
-                <height>40</height>
+                <height>50</height>
                </size>
               </property>
              </spacer>
             </item>
             <item>
              <layout class="QFormLayout" name="formLayout_2">
+              <property name="horizontalSpacing">
+               <number>40</number>
+              </property>
+              <property name="verticalSpacing">
+               <number>6</number>
+              </property>
               <item row="0" column="0">
                <widget class="QLabel" name="input_host_label">
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
                 <property name="text">
                  <string>Имя хоста</string>
                 </property>
@@ -435,6 +517,17 @@ background-attachment: fixed;</string>
               </item>
               <item row="0" column="1">
                <widget class="QLineEdit" name="host_input">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
                 <property name="maxLength">
                  <number>64</number>
                 </property>
@@ -442,6 +535,11 @@ background-attachment: fixed;</string>
               </item>
               <item row="1" column="0">
                <widget class="QLabel" name="input_port_label">
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
                 <property name="text">
                  <string>Порт</string>
                 </property>
@@ -449,6 +547,17 @@ background-attachment: fixed;</string>
               </item>
               <item row="1" column="1">
                <widget class="QLineEdit" name="port_input">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
                 <property name="maxLength">
                  <number>8</number>
                 </property>
@@ -458,6 +567,17 @@ background-attachment: fixed;</string>
             </item>
             <item>
              <widget class="QPushButton" name="join_button">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>40</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>13</pointsize>
+               </font>
+              </property>
               <property name="cursor">
                <cursorShape>PointingHandCursor</cursorShape>
               </property>
@@ -485,6 +605,17 @@ background-attachment: fixed;</string>
         </item>
         <item row="1" column="0">
          <widget class="QPushButton" name="back_to_menu_button">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>13</pointsize>
+           </font>
+          </property>
           <property name="text">
            <string>В главное меню</string>
           </property>

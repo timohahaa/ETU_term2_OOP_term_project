@@ -10,13 +10,17 @@
 class QGameClient : public QObject
 {
     Q_OBJECT
+    void process_answer(Message msg);
+    void handshake(Message msg);
+    void event_handler(Message msg);
+
 public:
     explicit QGameClient(QObject *parent = nullptr);
 
     QTcpSocket *socket = new QTcpSocket;
     void connectToHost(QString host, quint16 port);
     void disconnect();
-    void process_answer(Message msg);
+
 private slots:
 
     void connection_error();
@@ -24,13 +28,15 @@ private slots:
     void sockReadyRead();
 
 signals:
-    void cant_connect();
-    void server_disconnected();
-    void connect_and_wait();
-    void connect_and_start();
+    void connecting(); //
+    void connect_failed();//
+    void handshaking(); //
+    void party_full(); //
+    void connected(); //
+    void opponent_left(); // когда начнем прописывать ивенты
+    void starting_game();
 
-
-    void start_game();
+    void game_started();
 
 
 };

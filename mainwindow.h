@@ -37,10 +37,23 @@ private slots:
 
     void on_cancel_connection_button_clicked();
 
+    void show_connection_status(QString status);
+
+    void client_connecting(); //
+    void client_connect_failed();//
+    void client_handshaking(); //
+    void client_party_full(); //
+    void client_connected(); //
+    void client_opponent_left();
+    void client_starting_game();
+
+
     //void server_ready();
+
 
 private:
     quint64 start_time;
+    bool self_hosting = 0;
 
     Ui::MainWindow *ui;
 

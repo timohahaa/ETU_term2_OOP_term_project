@@ -28,7 +28,7 @@ public:
     bool read(QTcpSocket *&socket){
         QDataStream stream(socket);
         stream.setVersion(QDataStream::Qt_5_0);
-        stream.setByteOrder(QDataStream::BigEndian);
+        stream.setByteOrder(QDataStream::LittleEndian);
         quint32 length = 0;
 
         if (socket->bytesAvailable() < sizeof(quint32))
@@ -58,7 +58,7 @@ public:
     void send_to(QTcpSocket *socket){
         QDataStream outputStream(socket);
         outputStream.setVersion(QDataStream::Qt_5_0);
-        outputStream.setByteOrder(QDataStream::BigEndian);
+        outputStream.setByteOrder(QDataStream::LittleEndian);
         auto msg = pack();
         outputStream << msg;
     }
@@ -90,6 +90,7 @@ class ServerMessages{
 public:
     static const Message ConnectDecline(){
         QJsonObject answer;
+        answer.insert("method", QJsonValue("connect"));
         answer.insert("status", QJsonValue("error"));
         answer.insert("reason", QJsonValue("party_full"));
         QJsonDocument json(answer);
@@ -97,10 +98,24 @@ public:
     };
     static const Message ConnectAccept(){
         QJsonObject answer;
+        answer.insert("method", QJsonValue("connect"));
         answer.insert("status", QJsonValue("success"));
         QJsonDocument json(answer);
         return Message::from_json(json);
     };
+    static const Message EventOpponentLeft(){
+        QJsonObject answer;
+        answer.insert("event", QJsonValue("opponent_left"));
+        QJsonDocument json(answer);
+        return Message::from_json(json);
+    }
+    static const Message EventStartingUp(){
+        QJsonObject answer;
+        answer.insert("event", QJsonValue("starting_up"));
+        QJsonDocument json(answer);
+        return Message::from_json(json);
+    }
+
 };
 
 class ClientMessages{
