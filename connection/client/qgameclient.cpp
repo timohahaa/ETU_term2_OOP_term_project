@@ -23,6 +23,11 @@ void QGameClient::disconnect()
     socket->disconnectFromHost();
 }
 
+void QGameClient::send(Message msg)
+{
+    msg.send_to(this->socket);
+}
+
 void QGameClient::process_answer(Message msg)
 {
     auto json = msg.get_data().object();
@@ -35,7 +40,6 @@ void QGameClient::process_answer(Message msg)
     }
     if (json.contains("event")){
         qDebug() << "КЛИЕНТ: НОВОЕ СОБЫТИЕ" << msg.get_json_string();
-
         event_handler(msg);
     }
 
@@ -67,6 +71,9 @@ void QGameClient::event_handler(Message msg)
     }
     else if (json["event"].toString() == "starting_up"){
         emit starting_game();
+    }
+    else if (json["event"].toString() == "game_started"){
+        emit game_started();
     }
 
 }

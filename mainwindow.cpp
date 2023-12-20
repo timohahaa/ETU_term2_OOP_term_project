@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     this->start_time = QDateTime::currentMSecsSinceEpoch();
-    qDebug() << this->start_time;
+    //qDebug() << this->start_time;
     auto *M_filter = new QIntValidator(MIN_M_VAL, MAX_M_VAL);
     auto *N_filter = new QIntValidator(MIN_N_VAL, MAX_N_VAL);
     auto *K_filter = new QIntValidator(MIN_K_VAL, MAX_K_VAL);
@@ -98,6 +98,7 @@ void MainWindow::on_create_server_button_clicked()
             connect(client, SIGNAL(connected()), this, SLOT(client_connected()));
             connect(client, SIGNAL(opponent_left()), this, SLOT(client_opponent_left()));
             connect(client, SIGNAL(starting_game()), this, SLOT(client_starting_game()));
+            connect(client, SIGNAL(game_started()), this, SLOT(client_game_started()));
 
             client->connectToHost("localhost",6000);
         }
@@ -131,6 +132,7 @@ void MainWindow::on_join_button_clicked()
     connect(client, SIGNAL(connected()), this, SLOT(client_connected()));
     connect(client, SIGNAL(opponent_left()), this, SLOT(client_opponent_left()));
     connect(client, SIGNAL(starting_game()), this, SLOT(client_starting_game()));
+    connect(client, SIGNAL(game_started()), this, SLOT(client_game_started()));
 
     self_hosting = 0;
     client->connectToHost(host, port);
@@ -147,8 +149,19 @@ void MainWindow::on_join_button_clicked()
 
 void MainWindow::on_leave_button_clicked()
 {
+    if (server and server->is_listening()){
+        server->shutdown();
+        delete server;
+        server = nullptr;
+    }
+
+    if (client){
+        client->disconnect();
+        delete client;
+        client = nullptr;
+    }
+
     this->ui->stackedWidget->setCurrentIndex(TitleScreen);
-    //и вся логика выхода
 }
 
 void MainWindow::on_cancel_connection_button_clicked()
@@ -165,12 +178,7 @@ void MainWindow::on_cancel_connection_button_clicked()
         client = nullptr;
     }
 
-
-
-
-
     this->ui->stackedWidget->setCurrentIndex(TitleScreen);
-    //и вся логика дисконнекта или шатдауна сервера;
 }
 
 void MainWindow::show_connection_status(QString status)
@@ -222,6 +230,13 @@ void MainWindow::client_starting_game()
 {
     show_connection_status("Оба игрока на месте. Игра скоро начнётся.");
     // сделать хендшейк с таймстемпами.
+    client->send(ClientMessages::connect_timestamps(start_time));
+}
+
+void MainWindow::client_game_started()
+{
+    ui->stackedWidget->setCurrentIndex(GameScreen);
+    qDebug() << "ИГРА НАЧАЛАСЬ";
 }
 
 
@@ -233,10 +248,15 @@ void MainWindow::client_starting_game()
 
 
 //TODO коннект клиента
+
 // взаимодействие клиента и сервера
+
 // игровой процесс
+
 // покраснение поля
+
 // таймкоды и кто начинает первым
+
 // стилизация
 
 

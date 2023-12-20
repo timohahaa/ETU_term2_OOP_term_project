@@ -2,8 +2,8 @@
 //#include <QJsonDocument>
 //#include <QJsonObject>
 #include <QCoreApplication>
-#include "connection/message.h"
 #include <QNetworkInterface>
+#include "../message.h"
 
 Server::Server(QObject *parent)
 {
@@ -58,12 +58,14 @@ void Server::shutdown()
 
 }
 
+
 void Server::process_connection()
 {
     qDebug()<<"Поступает соединение";
     if (player1 == nullptr){
         player1 = tcpServer->nextPendingConnection();
         connect(player1, SIGNAL(disconnected()), this, SLOT(player_left()));
+        connect(player1, SIGNAL(readyRead()), this, SLOT(readyRead()));
 
         auto msg = ServerMessages::ConnectAccept();
         msg.send_to(player1);
@@ -72,6 +74,7 @@ void Server::process_connection()
     else if (player2 == nullptr){
         player2 =  tcpServer->nextPendingConnection();
         connect(player2, SIGNAL(disconnected()), this, SLOT(player_left()));
+        connect(player2, SIGNAL(readyRead()), this, SLOT(readyRead()));
 
         auto msg = ServerMessages::ConnectAccept();
         msg.send_to(player2);
@@ -95,6 +98,30 @@ void Server::process_connection()
 
 void Server::readyRead()
 {
+    auto player = qobject_cast<QTcpSocket*>(QObject::sender());
+    auto msg = Message::getFromSocket(player);
+    auto json = msg.get_data().object();
+
+    if (json.contains("method")){
+            qDebug() << "СЕРВЕР: ПРИШЕЛ ЗАПРОС" << msg.get_json_string();
+                                               if (json["method"].toString() == "timestamps"){
+            quint64 time = json["time"].toVariant().toULongLong();
+            if (player == player1){
+                p1_time = time;
+                qDebug()<<"Игрок 1 время:"<<p1_time;
+            }
+            else if (player == player2){
+                p2_time = time;
+                qDebug()<<"Игрок 2 время:"<<p2_time;
+            }
+            if (p1_time and p2_time){
+                auto msg = ServerMessages::EventGameStarted();
+                msg.send_to(player1);
+                msg.send_to(player2);
+            }
+        }
+
+    }
 
 }
 

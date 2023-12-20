@@ -20,6 +20,7 @@ public:
     QTcpSocket *socket = new QTcpSocket;
     void connectToHost(QString host, quint16 port);
     void disconnect();
+    void send(Message msg);
 
 private slots:
 
@@ -33,10 +34,10 @@ signals:
     void handshaking(); //
     void party_full(); //
     void connected(); //
-    void opponent_left(); // когда начнем прописывать ивенты
-    void starting_game();
+    void opponent_left(); //
+    void starting_game(); //
 
-    void game_started();
+    void game_started(); //
 
 
 };

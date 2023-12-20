@@ -46,6 +46,7 @@ private slots:
     void client_connected(); //
     void client_opponent_left();
     void client_starting_game();
+    void client_game_started();
 
 
     //void server_ready();

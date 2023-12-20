@@ -124,6 +124,9 @@
                 <bold>false</bold>
                </font>
               </property>
+              <property name="cursor">
+               <cursorShape>PointingHandCursor</cursorShape>
+              </property>
               <property name="text">
                <string>Сетевая игра</string>
               </property>
@@ -172,6 +175,9 @@
                 <pointsize>16</pointsize>
                 <bold>false</bold>
                </font>
+              </property>
+              <property name="cursor">
+               <cursorShape>PointingHandCursor</cursorShape>
               </property>
               <property name="text">
                <string>Выход</string>
@@ -306,6 +312,9 @@
                   <pointsize>12</pointsize>
                  </font>
                 </property>
+                <property name="text">
+                 <string>4</string>
+                </property>
                 <property name="maxLength">
                  <number>3</number>
                 </property>
@@ -336,6 +345,9 @@
                   <pointsize>12</pointsize>
                  </font>
                 </property>
+                <property name="text">
+                 <string>4</string>
+                </property>
                 <property name="maxLength">
                  <number>3</number>
                 </property>
@@ -365,6 +377,9 @@
                  <font>
                   <pointsize>12</pointsize>
                  </font>
+                </property>
+                <property name="text">
+                 <string>44</string>
                 </property>
                 <property name="maxLength">
                  <number>3</number>
@@ -528,6 +543,9 @@
                   <pointsize>12</pointsize>
                  </font>
                 </property>
+                <property name="text">
+                 <string>localhost</string>
+                </property>
                 <property name="maxLength">
                  <number>64</number>
                 </property>
@@ -557,6 +575,9 @@
                  <font>
                   <pointsize>12</pointsize>
                  </font>
+                </property>
+                <property name="text">
+                 <string>6000</string>
                 </property>
                 <property name="maxLength">
                  <number>8</number>
@@ -615,6 +636,9 @@
            <font>
             <pointsize>13</pointsize>
            </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
           </property>
           <property name="text">
            <string>В главное меню</string>
@@ -710,6 +734,11 @@
                 <height>40</height>
                </size>
               </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Сейчас: расстановка чисел</string>
               </property>
@@ -760,6 +789,11 @@
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                 </font>
                 </property>
                 <property name="text">
                  <string>Ваше поле</string>
@@ -826,6 +860,11 @@
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
                 <property name="text">
                  <string>Поле соперника</string>
                 </property>
@@ -860,8 +899,19 @@
          <layout class="QHBoxLayout" name="horizontalLayout_8">
           <item>
            <widget class="QPushButton" name="leave_button">
+            <property name="minimumSize">
+             <size>
+              <width>115</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
             <property name="text">
-             <string>Выход</string>
+             <string>Покинуть игру</string>
             </property>
            </widget>
           </item>
@@ -880,6 +930,11 @@
           </item>
           <item>
            <widget class="QLabel" name="scores_label">
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Счёт: X : X</string>
             </property>
@@ -903,6 +958,11 @@
           </item>
           <item>
            <widget class="QLabel" name="turns_left_label">
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Осталось ходов: U</string>
             </property>

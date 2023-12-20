@@ -115,14 +115,20 @@ public:
         QJsonDocument json(answer);
         return Message::from_json(json);
     }
+    static const Message EventGameStarted(){
+        QJsonObject answer;
+        answer.insert("event", QJsonValue("game_started"));
+        QJsonDocument json(answer);
+        return Message::from_json(json);
+    }
 
 };
 
 class ClientMessages{
 public:
-    static const Message connect_handshake(quint64 time){
+    static const Message connect_timestamps(quint64 time){
         QJsonObject answer;
-        answer.insert("method", QJsonValue("connect"));
+        answer.insert("method", QJsonValue("timestamps"));
         answer.insert("time", QJsonValue::fromVariant(QVariant(time)));
         QJsonDocument json(answer);
         return Message::from_json(json);
