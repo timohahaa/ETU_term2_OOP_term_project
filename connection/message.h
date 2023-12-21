@@ -4,6 +4,8 @@
 #include <QIODevice>
 #include <QTcpSocket>
 #include <QJsonObject>
+#include <QJsonArray>
+#include <game/gamecontroler.h>
 class Message{
     QByteArray data;
 
@@ -72,14 +74,6 @@ public:
     }
     QByteArray pack()
     {
-        //QByteArray msg;
-        //msg.clear();
-
-        //QDataStream outputStream(&msg, QIODevice::WriteOnly);
-        //outputStream.setVersion(QDataStream::Qt_5_0);
-        //outputStream.setByteOrder(QDataStream::LittleEndian);
-
-        //outputStream << data.; //msg.append(this->data);
         return this->data;
     }
     explicit operator bool() const
@@ -103,6 +97,44 @@ public:
         QJsonDocument json(answer);
         return Message::from_json(json);
     };
+    static const Message FieldAnswer(SetFieldResult result){
+        QJsonObject answer;
+        answer.insert("method", QJsonValue("set_field"));
+        if (result.ok())
+            answer.insert("status", QJsonValue("ok"));
+        else{
+            answer.insert("status", QJsonValue("error"));
+
+            QJsonObject extra;
+            extra.insert("field_size_error", QJsonValue(result.field_size_err));
+            extra.insert("not_enough_digits_error", QJsonValue(result.not_enough_digits));
+            extra.insert("extra_digits_error", QJsonValue(result.extra_digits));
+            extra.insert("neighbours_error", QJsonValue(result.neighbours));
+
+            QJsonArray errors;
+            foreach(auto err, result.errors){
+                QJsonArray coord;
+                coord.append(QJsonValue(err.i));
+                coord.append(QJsonValue(err.j));
+                errors.append(coord);
+            }
+            extra.insert("errors", QJsonValue(errors));
+
+            answer.insert("extra", QJsonValue(extra));
+        }
+        QJsonDocument json(answer);
+        return Message::from_json(json);
+    };
+    static const Message OpenCellAnswer(int i, int j, int val){
+        QJsonObject answer;
+        answer.insert("method", QJsonValue("open_cell"));
+        answer.insert("i", QJsonValue(i));
+        answer.insert("j", QJsonValue(j));
+        answer.insert("val", QJsonValue(val));
+        QJsonDocument json(answer);
+        return Message::from_json(json);
+    }
+
     static const Message EventOpponentLeft(){
         QJsonObject answer;
         answer.insert("event", QJsonValue("opponent_left"));
@@ -115,14 +147,45 @@ public:
         QJsonDocument json(answer);
         return Message::from_json(json);
     }
-    static const Message EventGameStarted(){
+    static const Message EventGameStarted(int N, int M, int K){
         QJsonObject answer;
         answer.insert("event", QJsonValue("game_started"));
+        answer.insert("field_size", QJsonValue(N));
+        answer.insert("numbers", QJsonValue(M));
+        answer.insert("turns", QJsonValue(K));
+
         QJsonDocument json(answer);
         return Message::from_json(json);
     }
+    static const Message EventOpponentReady(){
+        QJsonObject answer;
+        answer.insert("event", QJsonValue("opponent_ready"));
+        QJsonDocument json(answer);
+        return Message::from_json(json);
+    }
+    static const Message EventNextTurn(int scores1, int scores2, int turns, bool now_turn){
+        QJsonObject answer;
+        answer.insert("event", QJsonValue("next_turn"));
+        answer.insert("scores1", QJsonValue(scores1));
+        answer.insert("scores2", QJsonValue(scores2));
+        answer.insert("turns", QJsonValue(turns));
+        answer.insert("now_turn", QJsonValue(now_turn));
 
+        QJsonDocument json(answer);
+        return Message::from_json(json);
+    }
+    static const Message EventWin(bool player_win, int scores1, int scores2){
+        QJsonObject answer;
+        answer.insert("event", QJsonValue("win"));
+        answer.insert("who", QJsonValue(player_win));
+        answer.insert("scores1", QJsonValue(scores1));
+        answer.insert("scores2", QJsonValue(scores2));
+        QJsonDocument json(answer);
+        return Message::from_json(json);
+    }
 };
+
+
 
 class ClientMessages{
 public:
@@ -133,5 +196,31 @@ public:
         QJsonDocument json(answer);
         return Message::from_json(json);
     }
+    static const Message set_field(QVector<QVector<int>> field){
+        QJsonObject answer;
+        QJsonArray field_json;
+        foreach (auto row, field) {
+            QJsonArray row_json;
+            foreach(auto num, row){
+                row_json.append(QJsonValue(num));
+            }
+            field_json.append(QJsonValue(row_json));
+        }
+
+
+        answer.insert("method", QJsonValue("set_field"));
+        answer.insert("field", QJsonValue(field_json));
+        QJsonDocument json(answer);
+        return Message::from_json(json);
+    }
+    static const Message open_cell(int i, int j){
+        QJsonObject answer;
+        answer.insert("method", QJsonValue("open_cell"));
+        answer.insert("i", QJsonValue(i));
+        answer.insert("j", QJsonValue(j));
+        QJsonDocument json(answer);
+        return Message::from_json(json);
+    }
+
 };
 

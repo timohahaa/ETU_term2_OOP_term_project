@@ -38,3 +38,25 @@ int field::index(int row, int col)
 {
     return row * this->_size + col;
 }
+
+cell &field::operator()(int i, int j)
+{
+    return getCell(i, j);
+}
+
+bool field::fully_opened()
+{
+    for (int i = 0; i<getSize(); i++){
+        for (int j = 0; j<getSize(); j++){
+            if((*this)(i,j).hasNumber() and !(*this)(i,j).isOpen()){
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
+
+bool field::empty()
+{
+    return this->_size==0;
+}

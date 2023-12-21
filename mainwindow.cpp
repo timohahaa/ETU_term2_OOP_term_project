@@ -20,7 +20,74 @@ enum Screens{
 };
 
 
+void MainWindow::init_game_field(int N, int M, int K)
+{
+    auto *new_player_field = new QFieldWidget(ui->centralwidget, 0, N);
+    auto *new_opponent_field = new QFieldWidget(ui->centralwidget, 1, N);
 
+    ui->player_field_layout->replaceWidget(ui->player_field, new_player_field);
+    delete ui->player_field;
+    ui->player_field=new_player_field;
+
+    ui->opponent_field_layout->replaceWidget(ui->opponent_field, new_opponent_field);
+    delete ui->opponent_field;
+    ui->opponent_field=new_opponent_field;
+    ui->opponent_field->setVisible(0);
+    ui->opponentfieldlabel->setVisible(0);
+
+}
+void MainWindow::default_field_hint(int N){
+    QString result_text = "Правила расстановки чисел:\n"
+                          " - Нельзя расставлять числа в соседних клетках\n"
+                          " - Вы должны расставить все числа от 1 до "+QString::number(N)+"\n"
+                          " - Нельзя расставлять одинаковые числа";
+
+    this->ui->set_field_hint_label->setText(result_text);
+}
+
+void MainWindow::start_guessing()
+{
+    ui->set_field_button->setVisible(0);
+    ui->set_field_hint_label->setVisible(0);
+    ui->scores_label->setVisible(1);
+    ui->turns_left_label->setVisible(1);
+    ui->opponentfieldlabel->setVisible(1);
+    ui->opponent_field->setVisible(1);
+}
+
+
+void MainWindow::update_field_hint(SetFieldResult res, int N)
+{
+    QString result_text;
+    QTextStream stream(&result_text);
+    if (res.ok()){
+        stream << "Поле успешно установлено!\n"
+                  "Дождитесь, пока противник установит поле!";
+    }
+    else {
+        stream << "Неверно расставлено поле:\n";
+        if (res.neighbours){
+            stream << " - Вы расставили числа в соседних клетках\n";
+        }
+        if (res.not_enough_digits){
+            stream << " - Вы должны расставить все числа от 1 до "<<QString::number(N)<<"\n";
+        }
+        if (res.extra_digits){
+            stream << " - Вы расставили лишние числа\n";
+        }
+        stream << "\n";
+        if (!res.errors.empty()){
+            stream << "Красным цветом выделены клетки,\nгде вы ошиблись.";
+        }
+
+
+
+
+    }
+
+    this->ui->set_field_hint_label->setText(result_text);
+
+}
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -50,12 +117,10 @@ void MainWindow::on_exit_button_clicked()
     QCoreApplication::quit();
 }
 
-
 void MainWindow::on_play_button_clicked()
 {
     this->ui->stackedWidget->setCurrentIndex(ConfigureScreen);
 }
-
 
 void MainWindow::on_back_to_menu_button_clicked()
 {
@@ -80,7 +145,7 @@ void MainWindow::on_create_server_button_clicked()
         this->ui->stackedWidget->setCurrentIndex(WaitScreen);
 
         this->show_connection_status("Инициализация сервера...");
-        server = new Server(this);
+        server = new Server(this, N, M, K);
 
         if (!server->start_listening()){
             this->show_connection_status("Ошибка инициализации\n"
@@ -98,7 +163,15 @@ void MainWindow::on_create_server_button_clicked()
             connect(client, SIGNAL(connected()), this, SLOT(client_connected()));
             connect(client, SIGNAL(opponent_left()), this, SLOT(client_opponent_left()));
             connect(client, SIGNAL(starting_game()), this, SLOT(client_starting_game()));
-            connect(client, SIGNAL(game_started()), this, SLOT(client_game_started()));
+            connect(client, SIGNAL(game_started(int, int, int)), this, SLOT(client_game_started(int, int, int)));
+            connect(client, SIGNAL(field_set_error(SetFieldResult)), this, SLOT(client_field_set_error(SetFieldResult)));
+            connect(client, SIGNAL(field_set_success(SetFieldResult)), this, SLOT(client_field_set_success(SetFieldResult)));
+            connect(client, SIGNAL(opponent_ready()), this, SLOT(client_opponent_ready()));
+            connect(client, SIGNAL(next_turn(int,int,int,bool)), this, SLOT(client_next_turn(int,int,int,bool)));
+            connect(client, SIGNAL(game_over(bool, int, int)), this, SLOT(client_game_over(bool, int, int)));
+            connect(client, SIGNAL(opened_cell(int,int,int)), this, SLOT(client_opened_cell(int,int,int)));
+
+
 
             client->connectToHost("localhost",6000);
         }
@@ -114,7 +187,6 @@ void MainWindow::on_create_server_button_clicked()
 
 
 }
-
 
 void MainWindow::on_join_button_clicked()
 {
@@ -132,7 +204,13 @@ void MainWindow::on_join_button_clicked()
     connect(client, SIGNAL(connected()), this, SLOT(client_connected()));
     connect(client, SIGNAL(opponent_left()), this, SLOT(client_opponent_left()));
     connect(client, SIGNAL(starting_game()), this, SLOT(client_starting_game()));
-    connect(client, SIGNAL(game_started()), this, SLOT(client_game_started()));
+    connect(client, SIGNAL(game_started(int, int, int)), this, SLOT(client_game_started(int, int, int)));
+    connect(client, SIGNAL(field_set_error(SetFieldResult)), this, SLOT(client_field_set_error(SetFieldResult)));
+    connect(client, SIGNAL(field_set_success(SetFieldResult)), this, SLOT(client_field_set_success(SetFieldResult)));
+    connect(client, SIGNAL(opponent_ready()), this, SLOT(client_opponent_ready()));
+    connect(client, SIGNAL(next_turn(int,int,int,bool)), this, SLOT(client_next_turn(int,int,int,bool)));
+    connect(client, SIGNAL(game_over(bool, int, int)), this, SLOT(client_game_over(bool, int, int)));
+    connect(client, SIGNAL(opened_cell(int,int,int)), this, SLOT(client_opened_cell(int,int,int)));
 
     self_hosting = 0;
     client->connectToHost(host, port);
@@ -233,30 +311,75 @@ void MainWindow::client_starting_game()
     client->send(ClientMessages::connect_timestamps(start_time));
 }
 
-void MainWindow::client_game_started()
+void MainWindow::client_game_started(int N, int M, int K)
 {
+    init_game_field(N, M, K);
+    this->ui->player_field->resetColors();
+    client->max_n = N;
+    client->max_k = K;
+    this->default_field_hint(N);
+    ui->set_field_button->setVisible(1);
+    ui->set_field_button->setEnabled(1);
+    ui->set_field_hint_label->setVisible(1);
+    ui->scores_label->setVisible(0);
+    ui->turns_left_label->setVisible(0);
     ui->stackedWidget->setCurrentIndex(GameScreen);
-    qDebug() << "ИГРА НАЧАЛАСЬ";
 }
 
+void MainWindow::client_field_set_success(SetFieldResult res)
+{
 
+    qDebug() << "Успешно установлено";
 
+    ui->current_state_label->setText("Сейчас: Ожидание расстановки противника");
+    update_field_hint(res, client->max_n);
+    this->ui->player_field->resetColors();
+    this->ui->player_field->setLockedState();
+    this->ui->set_field_button->setVisible(0);
+}
 
+void MainWindow::client_field_set_error(SetFieldResult res)
+{
+    qDebug() << "Ошибка установки поля!!";
+    update_field_hint(res, client->max_n);
+    ui->player_field->resetColors();
+    foreach(auto coord, res.errors){
+        qDebug().nospace() << coord.i << coord.j;
+        ui->player_field->setCellColor(coord.i, coord.j, QFieldWidget::Error);
+    }
+}
 
+void MainWindow::client_opponent_ready()
+{
+    ui->current_state_label->setText("Сейчас: Расстановка чисел (противник готов)");
+    client->is_opponent_ready = 1;
+    if (ui->player_field->getState() == QFieldWidget::Locked){
+        start_guessing();
+    }
+}
 
+void MainWindow::opened_cell(int i, int j, int val)
+{
 
+}
 
+void MainWindow::game_over(bool player_win, int scores1, int scores2)
+{
 
-//TODO коннект клиента
+}
 
-// взаимодействие клиента и сервера
+void MainWindow::next_turn(int scores1, int scores2, int turnsmade, bool now_turn)
+{
 
-// игровой процесс
+}
 
-// покраснение поля
-
-// таймкоды и кто начинает первым
-
-// стилизация
-
+void MainWindow::on_set_field_button_clicked()
+{
+    auto msg = ClientMessages::set_field(ui->player_field->get_indexes());
+    client->send(msg);
+    client->is_opponent_ready = 1;
+    if (ui->player_field->getState() == QFieldWidget::Locked){
+        start_guessing();
+    }
+}
 

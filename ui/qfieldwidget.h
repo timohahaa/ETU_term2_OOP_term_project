@@ -13,14 +13,23 @@ class QFieldWidget : public QWidget {
 
 public:
     explicit QFieldWidget(QWidget *parent = nullptr, bool isOpponent = false, int _gridSize=9);
+    enum CellColor{
+        Default, Error
+    };
+    enum State {
+        Placing, Locked, Opponent
+    };
 
     // Добавленные функции
     void setPlacingState();
     void setOpponentState();
     void setLockedState();
-    void setCellColorFail(int row, int col);
-
+    void setCellColor(int row, int col, CellColor color);
+    void resetColors();
     void setVisible(bool isVisible);
+    void setDisabled(bool isDisabled);
+    QVector<QVector<int>> get_indexes();
+    State getState(){return currentState;}
 
 private slots:
     void handleCellClick();
@@ -34,9 +43,6 @@ private:
     QGridLayout *gridLayout;
     QWidget ***cells = nullptr; // Динамический массив для хранения виджетов
     int gridSize; // Размер поля
-    enum State {
-        Placing, Locked, Opponent
-    };
     State currentState; // Текущее состояние
 
     void createGrid();

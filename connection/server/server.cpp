@@ -8,10 +8,29 @@
 Server::Server(QObject *parent)
 {
     this->setParent(parent);
+    this->controller = nullptr;
     player1 = nullptr;
     player2 = nullptr;
     connect(tcpServer, SIGNAL(newConnection()), this, SLOT(process_connection()));
 
+}
+
+Server::Server(QObject *parent, int field_size, int numbers, int turns)
+{
+    this->setParent(parent);
+    this->controller = nullptr;
+    this->set_params(field_size, numbers, turns);
+    player1 = nullptr;
+    player2 = nullptr;
+    connect(tcpServer, SIGNAL(newConnection()), this, SLOT(process_connection()));
+
+}
+
+
+
+void Server::set_params(int field_size, int numbers, int turns)
+{
+    this->controller = new gameControler(field_size, numbers, turns);
 };
 
 bool Server::start_listening()
@@ -55,9 +74,7 @@ void Server::shutdown()
         msg.send_to(player2);
     }
     tcpServer->close();
-
 }
-
 
 void Server::process_connection()
 {
@@ -103,8 +120,8 @@ void Server::readyRead()
     auto json = msg.get_data().object();
 
     if (json.contains("method")){
-            qDebug() << "СЕРВЕР: ПРИШЕЛ ЗАПРОС" << msg.get_json_string();
-                                               if (json["method"].toString() == "timestamps"){
+        qDebug() << "СЕРВЕР: ПРИШЕЛ ЗАПРОС" << msg.get_json_string();
+        if (json["method"].toString() == "timestamps"){
             quint64 time = json["time"].toVariant().toULongLong();
             if (player == player1){
                 p1_time = time;
@@ -115,12 +132,72 @@ void Server::readyRead()
                 qDebug()<<"Игрок 2 время:"<<p2_time;
             }
             if (p1_time and p2_time){
-                auto msg = ServerMessages::EventGameStarted();
+                auto msg = ServerMessages::EventGameStarted(
+                    this->controller->getN_fieldSize(),
+                    this->controller->getM_numberCount(),
+                    this->controller->getK_numberOfTurns());
                 msg.send_to(player1);
                 msg.send_to(player2);
             }
         }
+        if (json["method"].toString() == "set_field"){
+            QVector<QVector<int>> field;
+            field.resize(this->controller->getN_fieldSize());
+            auto field_json = json["field"].toArray();
+            auto i = 0;
+            foreach (auto row_json, field_json) {
+                foreach (auto num_json, row_json.toArray()) {
+                    field[i].append(num_json.toInt());
+                }
+                i++;
+            }
 
+            SetFieldResult result;
+
+            if (player == player1){
+                result = controller->set_field(field, pl1);
+            }
+            else if (player == player2){
+                result = controller->set_field(field, pl2);
+            }
+
+            auto msg = ServerMessages::FieldAnswer(result);
+            if (player == player1){
+                msg.send_to(player1);
+                if (result.ok()){
+                    msg = ServerMessages::EventOpponentReady();
+                    msg.send_to(player2);
+                }
+            }
+            else if (player == player2){
+                msg.send_to(player2);
+                if (result.ok()){
+                    msg = ServerMessages::EventOpponentReady();
+                    msg.send_to(player1);
+                }
+            }
+            if (!controller->field_empty(pl1) and !controller->field_empty(pl2)){
+                bool pl1_turn = p1_time<=p2_time;
+
+
+                msg = ServerMessages::EventNextTurn(
+                    controller->getScores(pl1),
+                    controller->getScores(pl2),
+                    controller->getTurnsMade(),
+                    pl1_turn
+                    );
+                msg.send_to(player1);
+                msg = ServerMessages::EventNextTurn(
+                    controller->getScores(pl2),
+                    controller->getScores(pl1),
+                    controller->getTurnsMade(),
+                    !pl1_turn
+                    );
+                msg.send_to(player2);
+            }// ДОБАВИТЬ В КОНТРОЛЛЕР ХОДЫ И НАЧАТЬ ХОДИТЬ ПО ОЧЕРЕДИ!!!!
+
+
+        }
     }
 
 }

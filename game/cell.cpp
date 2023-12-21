@@ -18,7 +18,7 @@ bool cell::isOpen()
 
 bool cell::hasNumber()
 {
-    return this->_hasNumber;
+    return this->_hasNumber();
 }
 
 int cell::number()
@@ -29,6 +29,5 @@ int cell::number()
 void cell::setNumber(int number)
 {
     this->_number = number;
-    this->_hasNumber = true;
 }
 
