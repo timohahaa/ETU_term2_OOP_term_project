@@ -325,7 +325,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>4</string>
+                 <string/>
                 </property>
                 <property name="maxLength">
                  <number>3</number>
@@ -358,7 +358,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>4</string>
+                 <string/>
                 </property>
                 <property name="maxLength">
                  <number>3</number>
@@ -391,7 +391,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>44</string>
+                 <string/>
                 </property>
                 <property name="maxLength">
                  <number>3</number>
@@ -556,7 +556,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>localhost</string>
+                 <string/>
                 </property>
                 <property name="maxLength">
                  <number>64</number>
@@ -589,7 +589,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>6000</string>
+                 <string/>
                 </property>
                 <property name="maxLength">
                  <number>8</number>

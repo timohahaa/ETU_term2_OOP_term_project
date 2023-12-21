@@ -36,7 +36,7 @@ void Server::set_params(int field_size, int numbers, int turns)
 
 bool Server::start_listening()
 {
-    if(!tcpServer->listen(QHostAddress::LocalHost, 6000)){
+    if(!tcpServer->listen(QHostAddress::AnyIPv4, 6000)){
         return false;
     }
     return true;
