@@ -21,6 +21,9 @@ public:
     };
 
     // Добавленные функции
+    void opponent_lock();
+    void opponent_unlock();
+
     void setPlacingState();
     void setOpponentState();
     void setLockedState();
@@ -31,6 +34,7 @@ public:
     QVector<QVector<int>> get_indexes();
     State getState(){return currentState;}
 
+    void set_cell_text(int col, int row, QString text);
 private slots:
     void handleCellClick();
     void updateGridSize(int size);
@@ -38,7 +42,6 @@ private slots:
 private:
     QLineEdit* createLineEdit(int row, int col);
     QPushButton* createPushButton(int row, int col);
-
 
     QGridLayout *gridLayout;
     QWidget ***cells = nullptr; // Динамический массив для хранения виджетов
@@ -49,6 +52,8 @@ private:
     void clearGrid();
     void updateCellState(int row, int col);
 
+signals:
+    void cell_clicked(int i, int j);
 };
 
 #endif // QFIELDWIDGET_H

@@ -49,8 +49,9 @@ signals:
     void field_set_error(SetFieldResult);
     void opponent_ready();
 
+    void opponent_opened_cell(int, int);
     void opened_cell(int, int, int);
-    void game_over(bool, int, int);
+    void game_over(ServerMessages::EndStates, int, int);
     void next_turn(int, int, int, bool);
 
 };

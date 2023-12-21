@@ -50,17 +50,21 @@ public:
 
     int getTurnsMade() const;
 
+    Players getWhos_turn() const;
+    void setWhos_turn(Players newWhos_turn);
+
 private:
+    Players whos_turn;
     int N_fieldSize;
     int M_numberCount;
     int K_numberOfTurns;
 
     int turnsMade = 0;
-    int scores1;
-    int scores2;
+    int scores1 = 0;
+    int scores2 = 0;
 
-    field field1;
-    field field2;
+    field* field1=nullptr;
+    field* field2=nullptr;
 
     bool gameHasEnded();
 };

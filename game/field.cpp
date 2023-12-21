@@ -15,7 +15,7 @@ cell& field::getCell(int row, int col)
 
 open_result field::openCell(int row, int col)
 {
-    cell c = this->getCell(row, col);
+    cell& c = this->getCell(row, col);
     c.open();
     open_result res;
     res.hasNumber = c.hasNumber();
@@ -25,7 +25,9 @@ open_result field::openCell(int row, int col)
 
 void field::setNumberToCell(int row, int col, int number)
 {
-    cell c = this->getCell(row, col);
+    cell& c = this->getCell(row, col);
+
+
     c.setNumber(number);
 }
 
@@ -48,7 +50,8 @@ bool field::fully_opened()
 {
     for (int i = 0; i<getSize(); i++){
         for (int j = 0; j<getSize(); j++){
-            if((*this)(i,j).hasNumber() and !(*this)(i,j).isOpen()){
+            auto& cell = (*this)(i,j);
+            if(cell.hasNumber() and !cell.isOpen()){
                 return 0;
             }
         }

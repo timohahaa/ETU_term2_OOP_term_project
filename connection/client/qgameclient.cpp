@@ -79,7 +79,39 @@ void QGameClient::event_handler(Message msg)
                           json["numbers"].toInt(),
                           json["turns"].toInt());
     }
+    else if (json["event"].toString() == "next_turn"){
+        emit next_turn(
+            json["scores1"].toInt(),
+            json["scores2"].toInt(),
+            json["turns"].toInt(),
+            json["now_turn"].toBool());
+    }
+    else if (json["event"].toString() == "opponent_opened_cell"){
+        emit opponent_opened_cell(
+            json["i"].toInt(),
+            json["j"].toInt()
+        );
+    }
 
+    else if (json["event"].toString() == "win"){
+        ServerMessages::EndStates state;
+        switch (json["who"].toInt()){
+        case 0:
+            state = ServerMessages::Win;
+            break;
+        case 1:
+            state = ServerMessages::Lose;
+            break;
+        default:
+            state = ServerMessages::Draw;
+            break;
+        }
+        emit game_over(state,
+                       json["scores1"].toInt(),
+                       json["scores2"].toInt()
+                       );
+
+    }
 
 }
 
@@ -115,9 +147,12 @@ void QGameClient::method_handler(Message msg)
         }
         emit field_set_error(res);
     }
-
     if (json["method"].toString() == "open_cell"){
-
+        emit opened_cell(
+            json["i"].toInt(),
+            json["j"].toInt(),
+            json["val"].toInt()
+        );
     }
 
 }

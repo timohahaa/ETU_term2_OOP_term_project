@@ -57,9 +57,12 @@ private slots:
     void client_field_set_success(SetFieldResult);
     void client_field_set_error(SetFieldResult);
     void client_opponent_ready();
-    void opened_cell(int, int, int);
-    void game_over(bool player_win, int scores1, int scores2);
-    void next_turn(int, int, int, bool);
+    void client_opened_cell(int, int, int);
+    void client_game_over(ServerMessages::EndStates player_win, int scores1, int scores2);
+    void client_next_turn(int, int, int, bool);
+    void client_opponent_opened_cell(int, int);
+
+    void on_opponent_field_button_clicked(int i, int j);
 
     //void server_ready();
 

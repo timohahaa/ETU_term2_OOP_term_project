@@ -6,6 +6,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <game/gamecontroler.h>
+
 class Message{
     QByteArray data;
 
@@ -33,7 +34,7 @@ public:
         stream.setByteOrder(QDataStream::LittleEndian);
         quint32 length = 0;
 
-        if (socket->bytesAvailable() < sizeof(quint32))
+        if (socket->bytesAvailable() < qint64(sizeof(quint32)))
             return 0;
         stream >> length;
 
@@ -82,6 +83,9 @@ public:
 
 class ServerMessages{
 public:
+    enum EndStates{
+        Win, Lose, Draw
+    };
     static const Message ConnectDecline(){
         QJsonObject answer;
         answer.insert("method", QJsonValue("connect"));
@@ -174,12 +178,20 @@ public:
         QJsonDocument json(answer);
         return Message::from_json(json);
     }
-    static const Message EventWin(bool player_win, int scores1, int scores2){
+    static const Message EventWin(EndStates player_win, int scores1, int scores2){
         QJsonObject answer;
         answer.insert("event", QJsonValue("win"));
         answer.insert("who", QJsonValue(player_win));
         answer.insert("scores1", QJsonValue(scores1));
         answer.insert("scores2", QJsonValue(scores2));
+        QJsonDocument json(answer);
+        return Message::from_json(json);
+    }
+    static const Message EventOpponentOpenedCell(int i, int j){
+        QJsonObject answer;
+        answer.insert("event", QJsonValue("opponent_opened_cell"));
+        answer.insert("i", QJsonValue(i));
+        answer.insert("j", QJsonValue(j));
         QJsonDocument json(answer);
         return Message::from_json(json);
     }

@@ -5,6 +5,7 @@
 #include <QNetworkInterface>
 #include "../message.h"
 
+
 Server::Server(QObject *parent)
 {
     this->setParent(parent);
@@ -145,8 +146,8 @@ void Server::readyRead()
             field.resize(this->controller->getN_fieldSize());
             auto field_json = json["field"].toArray();
             auto i = 0;
-            foreach (auto row_json, field_json) {
-                foreach (auto num_json, row_json.toArray()) {
+            for (auto row_json: field_json) {
+                for (auto num_json: row_json.toArray()) {
                     field[i].append(num_json.toInt());
                 }
                 i++;
@@ -178,7 +179,10 @@ void Server::readyRead()
             }
             if (!controller->field_empty(pl1) and !controller->field_empty(pl2)){
                 bool pl1_turn = p1_time<=p2_time;
-
+                if (pl1_turn)
+                    controller->setWhos_turn(pl1);
+                else
+                    controller->setWhos_turn(pl2);
 
                 msg = ServerMessages::EventNextTurn(
                     controller->getScores(pl1),
@@ -194,7 +198,92 @@ void Server::readyRead()
                     !pl1_turn
                     );
                 msg.send_to(player2);
-            }// ДОБАВИТЬ В КОНТРОЛЛЕР ХОДЫ И НАЧАТЬ ХОДИТЬ ПО ОЧЕРЕДИ!!!!
+            }
+
+
+        }
+        if (json["method"].toString() == "open_cell"){
+            if (
+                (player==player1 and controller->getWhos_turn()==pl1)
+                or
+                (player==player2 and controller->getWhos_turn()==pl2)){
+
+
+                //Выслали походившему результат
+                auto result = controller->openCell(
+                    json["i"].toInt(),
+                    json["j"].toInt()
+                    );
+                auto msg = ServerMessages::OpenCellAnswer(
+                    json["i"].toInt(),
+                    json["j"].toInt(),
+                    result.number
+                );
+                msg.send_to(player);
+                //Выслали сопернику что открыли клетку
+                msg = ServerMessages::EventOpponentOpenedCell(
+                    json["i"].toInt(),
+                    json["j"].toInt()
+                );
+                if (player == player1){
+                    msg.send_to(player2);
+                }
+                else{
+                    msg.send_to(player1);
+                }
+
+
+
+                //вкинули ивент хода (даже если победа для обновы счета)
+                bool pl1_turn = controller->getWhos_turn()==pl1;
+
+                msg = ServerMessages::EventNextTurn(
+                    controller->getScores(pl1),
+                    controller->getScores(pl2),
+                    controller->getTurnsMade(),
+                    pl1_turn
+                    );
+                msg.send_to(player1);
+                msg = ServerMessages::EventNextTurn(
+                    controller->getScores(pl2),
+                    controller->getScores(pl1),
+                    controller->getTurnsMade(),
+                    !pl1_turn
+                    );
+                msg.send_to(player2);
+
+                //Если победа, отослали ивент победы;
+                if (result.gameEnded){
+
+                    //Формируем состояния для игроков
+
+                    ServerMessages::EndStates endstate1;
+                    ServerMessages::EndStates endstate2;
+
+                    if (controller->getScores(pl1)<controller->getScores(pl2)){
+                        endstate1 = ServerMessages::Lose;
+                        endstate2 = ServerMessages::Win;
+                    }
+                    else if (controller->getScores(pl1)>controller->getScores(pl2)){
+                        endstate1 = ServerMessages::Win;
+                        endstate2 = ServerMessages::Lose;
+                    }
+                    else{
+                        endstate1 = ServerMessages::Draw;
+                        endstate2 = ServerMessages::Draw;
+                    }
+
+                    msg = ServerMessages::EventWin(endstate1, controller->getScores(pl1),
+                                                   controller->getScores(pl2));
+                    msg.send_to(player1);
+                    msg = ServerMessages::EventWin(endstate2, controller->getScores(pl2),
+                                                   controller->getScores(pl1));
+                    msg.send_to(player2);
+
+
+                }
+
+            }
 
 
         }

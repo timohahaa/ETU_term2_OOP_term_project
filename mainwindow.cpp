@@ -20,7 +20,7 @@ enum Screens{
 };
 
 
-void MainWindow::init_game_field(int N, int M, int K)
+void MainWindow::init_game_field(int N, int, int)
 {
     auto *new_player_field = new QFieldWidget(ui->centralwidget, 0, N);
     auto *new_opponent_field = new QFieldWidget(ui->centralwidget, 1, N);
@@ -34,12 +34,14 @@ void MainWindow::init_game_field(int N, int M, int K)
     ui->opponent_field=new_opponent_field;
     ui->opponent_field->setVisible(0);
     ui->opponentfieldlabel->setVisible(0);
+    connect(ui->opponent_field, SIGNAL(cell_clicked(int,int)), this, SLOT(on_opponent_field_button_clicked(int,int)));
+
 
 }
-void MainWindow::default_field_hint(int N){
+void MainWindow::default_field_hint(int M){
     QString result_text = "Правила расстановки чисел:\n"
                           " - Нельзя расставлять числа в соседних клетках\n"
-                          " - Вы должны расставить все числа от 1 до "+QString::number(N)+"\n"
+                          " - Вы должны расставить все числа от 1 до "+QString::number(M)+"\n"
                           " - Нельзя расставлять одинаковые числа";
 
     this->ui->set_field_hint_label->setText(result_text);
@@ -168,9 +170,9 @@ void MainWindow::on_create_server_button_clicked()
             connect(client, SIGNAL(field_set_success(SetFieldResult)), this, SLOT(client_field_set_success(SetFieldResult)));
             connect(client, SIGNAL(opponent_ready()), this, SLOT(client_opponent_ready()));
             connect(client, SIGNAL(next_turn(int,int,int,bool)), this, SLOT(client_next_turn(int,int,int,bool)));
-            connect(client, SIGNAL(game_over(bool, int, int)), this, SLOT(client_game_over(bool, int, int)));
+            connect(client, SIGNAL(game_over(ServerMessages::EndStates, int, int)), this, SLOT(client_game_over(ServerMessages::EndStates, int, int)));
             connect(client, SIGNAL(opened_cell(int,int,int)), this, SLOT(client_opened_cell(int,int,int)));
-
+            connect(client, SIGNAL(opponent_opened_cell(int, int)), this, SLOT(client_opponent_opened_cell(int,int)));
 
 
             client->connectToHost("localhost",6000);
@@ -209,8 +211,9 @@ void MainWindow::on_join_button_clicked()
     connect(client, SIGNAL(field_set_success(SetFieldResult)), this, SLOT(client_field_set_success(SetFieldResult)));
     connect(client, SIGNAL(opponent_ready()), this, SLOT(client_opponent_ready()));
     connect(client, SIGNAL(next_turn(int,int,int,bool)), this, SLOT(client_next_turn(int,int,int,bool)));
-    connect(client, SIGNAL(game_over(bool, int, int)), this, SLOT(client_game_over(bool, int, int)));
+    connect(client, SIGNAL(game_over(ServerMessages::EndStates, int, int)), this, SLOT(client_game_over(ServerMessages::EndStates, int, int)));
     connect(client, SIGNAL(opened_cell(int,int,int)), this, SLOT(client_opened_cell(int,int,int)));
+    connect(client, SIGNAL(opponent_opened_cell(int, int)), this, SLOT(client_opponent_opened_cell(int,int)));
 
     self_hosting = 0;
     client->connectToHost(host, port);
@@ -317,7 +320,7 @@ void MainWindow::client_game_started(int N, int M, int K)
     this->ui->player_field->resetColors();
     client->max_n = N;
     client->max_k = K;
-    this->default_field_hint(N);
+    this->default_field_hint(M);
     ui->set_field_button->setVisible(1);
     ui->set_field_button->setEnabled(1);
     ui->set_field_hint_label->setVisible(1);
@@ -328,14 +331,17 @@ void MainWindow::client_game_started(int N, int M, int K)
 
 void MainWindow::client_field_set_success(SetFieldResult res)
 {
-
-    qDebug() << "Успешно установлено";
-
-    ui->current_state_label->setText("Сейчас: Ожидание расстановки противника");
     update_field_hint(res, client->max_n);
     this->ui->player_field->resetColors();
     this->ui->player_field->setLockedState();
     this->ui->set_field_button->setVisible(0);
+
+    if (ui->player_field->getState() == QFieldWidget::Locked and this->client->is_opponent_ready){
+        start_guessing();
+    }
+    else{
+        ui->current_state_label->setText("Сейчас: Ожидание расстановки противника");
+    }
 }
 
 void MainWindow::client_field_set_error(SetFieldResult res)
@@ -351,35 +357,89 @@ void MainWindow::client_field_set_error(SetFieldResult res)
 
 void MainWindow::client_opponent_ready()
 {
-    ui->current_state_label->setText("Сейчас: Расстановка чисел (противник готов)");
+
     client->is_opponent_ready = 1;
-    if (ui->player_field->getState() == QFieldWidget::Locked){
+
+    if (ui->player_field->getState() == QFieldWidget::Locked and this->client->is_opponent_ready){
         start_guessing();
     }
-}
-
-void MainWindow::opened_cell(int i, int j, int val)
-{
-
-}
-
-void MainWindow::game_over(bool player_win, int scores1, int scores2)
-{
+    else{
+        ui->current_state_label->setText("Сейчас: Расстановка чисел (противник готов)");
+    }
 
 }
 
-void MainWindow::next_turn(int scores1, int scores2, int turnsmade, bool now_turn)
+void MainWindow::client_opened_cell(int i, int j, int val)
 {
+    QString value = "";
+    if (val!=0){
+        value = QString::number(val);
+    }
+    ui->opponent_field->set_cell_text(i, j, value);
 
+}
+
+void MainWindow::client_game_over(ServerMessages::EndStates player_win, int scores1, int scores2)
+{
+    QString final;
+    disconnect(client, SIGNAL(connect_failed()), this, SLOT(client_connect_failed()));
+    disconnect(client, SIGNAL(opponent_left()), this, SLOT(client_opponent_left()));
+    switch(player_win){
+    case ServerMessages::Win:
+        final+="Вы выиграли!\n";
+        break;
+    case ServerMessages::Lose:
+        final+="Вы проиграли!\n";
+        break;
+    case ServerMessages::Draw:
+        final+="Ничья!\n";
+        break;
+    }
+    final+="Счёт: "+QString::number(scores1)+" : "+QString::number(scores2);
+
+    show_connection_status(final);
+}
+
+void MainWindow::client_next_turn(int scores1, int scores2, int turnsmade, bool now_turn)
+{
+    QString turn;
+    if (now_turn){
+        turn = "Сейчас: Ваш ход";
+    }
+    else{
+        turn = "Сейчас: Ход противника";
+    }
+    QString scores = "Счёт: "+QString::number(scores1)+" : "+QString::number(scores2);
+    QString turns = "Ход: "+ QString::number(turnsmade)+"/"+QString::number(client->max_k);
+
+    ui->turns_left_label->setText(turns);
+    ui->current_state_label->setText(turn);
+    ui->scores_label->setText(scores);
+    if (now_turn){
+        ui->opponent_field->opponent_unlock();
+    }
+    else {
+        ui->opponent_field->opponent_lock();
+    }
+
+
+
+}
+
+void MainWindow::client_opponent_opened_cell(int i, int j)
+{
+    ui->player_field->setCellColor(j,i, QFieldWidget::Error);
+}
+
+void MainWindow::on_opponent_field_button_clicked(int i, int j)
+{
+    auto msg = ClientMessages::open_cell(i, j);
+    client->send(msg);
 }
 
 void MainWindow::on_set_field_button_clicked()
 {
     auto msg = ClientMessages::set_field(ui->player_field->get_indexes());
     client->send(msg);
-    client->is_opponent_ready = 1;
-    if (ui->player_field->getState() == QFieldWidget::Locked){
-        start_guessing();
-    }
 }
 

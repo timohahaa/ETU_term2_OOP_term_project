@@ -26,9 +26,45 @@ QWidget(parent) {
     }
 
     createGrid();
-    //qDebug()<<fieldsize<< " " << fieldsize/_gridSize;
-
     setLayout(gridLayout);
+}
+
+void QFieldWidget::opponent_lock()
+{
+    if (currentState != Opponent)
+        return;
+
+    for (int row = 0; row < gridSize; ++row) {
+        for (int col = 0; col < gridSize; ++col) {
+            cells[row][col]->setDisabled(true);
+        }
+    }
+
+
+
+}
+
+void QFieldWidget::opponent_unlock()
+{
+    if (currentState != Opponent)
+        return;
+    for (int row = 0; row < gridSize; ++row) {
+        for (int col = 0; col < gridSize; ++col) {
+            if (cells[row][col]->styleSheet().isEmpty()){
+                cells[row][col]->setEnabled(true);
+            }
+        }
+    }
+}
+
+void QFieldWidget::set_cell_text(int col, int row, QString text)
+{
+    if (currentState==Opponent){
+        qobject_cast<QPushButton*>(cells[row][col])->setText(text);
+        qobject_cast<QPushButton*>(cells[row][col])->setDisabled(1);
+        setCellColor(row, col, Error);
+    }
+
 }
 
 void QFieldWidget::createGrid() {
@@ -101,25 +137,15 @@ QPushButton *QFieldWidget::createPushButton(int row, int col)
 
 void QFieldWidget::handleCellClick() {
     if (currentState == Opponent) {
-        QLineEdit *clickedLineEdit = qobject_cast<QLineEdit*>(sender());
-        if (clickedLineEdit) {
-            int row = clickedLineEdit->property("row").toInt();
-            int col = clickedLineEdit->property("col").toInt();
-
-            if (currentState == Placing) {
-                // Логика для режима размещения
-
-            }
-        }
-
-
-
-    } else {
         QPushButton *clickedButton = qobject_cast<QPushButton*>(sender());
         if (clickedButton) {
             int row = clickedButton->property("row").toInt();
             int col = clickedButton->property("col").toInt();
-            // Обработка клика в режиме LineEdit
+            if (clickedButton->isEnabled()){
+                emit cell_clicked(col, row);
+                qDebug()<< "Клик на "<<row<<" "<< col;
+            }
+
         }
     }
 }

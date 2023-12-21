@@ -7,24 +7,29 @@ gameControler::gameControler(int N, int M, int K)
     this->N_fieldSize = N;
     this->M_numberCount = M;
     this->K_numberOfTurns = K;
-    this->field1 = field(N);
-    this->field2 = field(N);
+    this->field1 = nullptr;
+    this->field2 = nullptr;
 }
 
 TurnResult gameControler::openCell(int row, int col)
 {
     this->turnsMade++;
+    open_result cell_result;
+
+    if (whos_turn==pl1){
+        cell_result = this->field2->openCell(row, col);
+        this->scores1+=cell_result.number;
+
+        this->whos_turn = pl2;
+    }
+    else{
+        cell_result = this->field1->openCell(row, col);
+        this->scores2+=cell_result.number;
+        this->whos_turn = pl1;
+    }
     TurnResult result;
-//    //open_result opres = this->_field.openCell(row, col);
-//    result res;
-//    res.hasNumber = opres.hasNumber;
-//    res.number = opres.number;
-//    res.gameEnded = this->gameHasEnded();
-//    if (res.hasNumber)
-//    {
-//        this->_sumOfOpenedCells += res.number;
-//        this->_countOpenNumberCells++;
-//    }
+    result.number = cell_result.number;
+    result.gameEnded = this->gameHasEnded();
     return result;
 }
 
@@ -69,13 +74,7 @@ SetFieldResult gameControler::set_field(QVector<QVector<int>> field_ind, Players
         }
     }
 
-    field* curfield = nullptr;
-    if (player){
-        curfield = &this->field2;
-    }
-    else{
-        curfield = &this->field1;
-    }
+
 
     QVector<int> various_digits;
     for (int i=1; i<=M_numberCount; i++){
@@ -120,16 +119,24 @@ SetFieldResult gameControler::set_field(QVector<QVector<int>> field_ind, Players
         result.not_enough_digits = 1;
     }
 
+    field* curfield;
     if (result.ok()){
         int i = 0;
         int j = 0;
-        (*curfield) = field(N_fieldSize);
+        curfield = new field(N_fieldSize);
         foreach (auto row, field_ind) {
+            i=0;
             foreach (auto num, row){
-                (*curfield).setNumberToCell(i,j,num);
+                curfield->setNumberToCell(i,j,num);
                 i++;
             }
             j++;
+        }
+        if (player==pl2){
+            this->field2 = curfield;
+        }
+        else{
+            this->field1 = curfield;
         }
 
     }
@@ -140,10 +147,11 @@ SetFieldResult gameControler::set_field(QVector<QVector<int>> field_ind, Players
 bool gameControler::field_empty(Players player)
 {
     if (player){
-        return this->field2.empty();
+
+        return this->field2==nullptr;
     }
     else{
-        return this->field1.empty();
+        return this->field1==nullptr;
     }
 }
 
@@ -152,10 +160,20 @@ int gameControler::getTurnsMade() const
     return turnsMade;
 }
 
+Players gameControler::getWhos_turn() const
+{
+    return whos_turn;
+}
+
+void gameControler::setWhos_turn(Players newWhos_turn)
+{
+    whos_turn = newWhos_turn;
+}
+
 bool gameControler::gameHasEnded()
 {
     return (
-        this->turnsMade >= this->K_numberOfTurns or
-        this->field1.fully_opened() or this->field2.fully_opened()
+        (this->turnsMade >= this->K_numberOfTurns) or
+        this->field1->fully_opened() or this->field2->fully_opened()
     );
 }
